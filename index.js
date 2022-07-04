@@ -1,69 +1,14 @@
-class StorageAvailable {
-  constructor(type) {
-    this.type = type;
-    this.storage = window[this.type];
-  }
+import { StorageAvailable } from './modules/storageAvailable.js';
+import { AwesomeBooks } from './modules/awsomeBooks.js';
+import { Book } from './modules/book.js';
+import { newDatetime } from './modules/dataTime.js';
 
-  try() {
-    const x = '__storage_test__';
-    this.storage.setItem(x, x);
-    this.storage.removeItem(x);
-    return true;
-  }
-
-  catch(e) {
-    return e instanceof DOMException && (
-      e.code === 22
-
-      || e.code === 1014
-
-      || e.name === 'QuotaExceededError'
-
-      || e.name === 'NS_ERROR_DOM_QUOTA_REACHED')
-
-      && (this.storage && this.storage.length !== 0);
-  }
-}
 const addButton = document.querySelector('.add-btn');
 const title = document.getElementById('title');
 const author = document.getElementById('author');
 const booksContainer = document.getElementById('books-container');
-let removeButtons = Array.from(document.querySelectorAll('.remove-btn'));
-
-class AwesomeBooks {
-  constructor() {
-    this.books = [];
-    this.dataFromStorage = [];
-  }
-
-  addBooktoHTML(title, author, id) {
-    const bookHTML = document.createElement('div');
-    bookHTML.classList.add('book');
-    if (id % 2 === 0) {
-      bookHTML.classList.add('gray');
-    }
-    bookHTML.innerHTML = `
-          <p class="title">"${title}" By</p>
-          <p class="author">${author}</p>
-          <button class="remove-btn">remove</button>
-      `;
-    booksContainer.appendChild(bookHTML);
-  }
-
-  removeBookFromHTML() {
-    removeButtons = Array.from(document.querySelectorAll('.remove-btn'));
-    removeButtons.forEach((btn) => {
-      btn.addEventListener('click', () => {
-        booksContainer.removeChild(btn.parentElement);
-        this.books = this.books.filter((book, index) => index !== removeButtons.indexOf(btn));
-        localStorage.setItem('BooksDataItem', JSON.stringify(this.books));
-        removeButtons = Array.from(document.querySelectorAll('.remove-btn'));
-      });
-    });
-  }
-}
-
-const awesomeBooks = new AwesomeBooks();
+const removeButtons = Array.from(document.querySelectorAll('.remove-btn'));
+const awesomeBooks = new AwesomeBooks(booksContainer, removeButtons);
 
 if (new StorageAvailable('localStorage')) {
   awesomeBooks.dataFromStorage = JSON.parse(localStorage.getItem('BooksDataItem'));
@@ -80,13 +25,6 @@ if (new StorageAvailable('localStorage')) {
   awesomeBooks.books = awesomeBooks.dataFromStorage;
 }
 
-class Book {
-  constructor(title, author) {
-    this.title = title;
-    this.author = author;
-  }
-}
-
 addButton.addEventListener('click', () => {
   const titleInputValue = title.value;
   const authorInputValue = author.value;
@@ -101,7 +39,7 @@ addButton.addEventListener('click', () => {
 });
 
 const date = document.querySelector('.date');
-date.innerHTML = new Date();
+date.innerHTML = newDatetime;
 
 const bookList = document.querySelector('.list');
 const addBook = document.querySelector('.add');
